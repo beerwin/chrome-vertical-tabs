@@ -1,0 +1,22 @@
+{
+    "name": "NJ Vertical Tabs",
+    "description": "Vertical Tabs for Chrome",
+    "version": "1.0",
+    "manifest_version": 3,
+    "side_panel": {
+        "default_path": "side_panel.html",
+        "browser_style": true
+    },
+    "action": {
+        "title": "Open vertical tabs"
+
+    },
+    "background": {
+        "service_worker": "service-worker.js"
+    },
+    "permissions": [
+        "sidePanel",
+        "tabGroups",
+        "tabs"
+    ]
+}

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Tabs for Chrome</title>
+    <link rel="stylesheet" href="side_panel.css">
+</head>
+<body>
+    <div class="tabs">
+        <div class="pinned-tabs">
+        </div>
+        <div class="groups"></div>
+        <div class="group-icons">
+            group icons here
+        </div>
+        <button id="new-tab" title="New tab">+</button>
+    </div>
+
+    <dialog id="groupContextDialog">
+        <form>
+            <label for="groupName">Group name</label>
+            <input type="text" id="groupName" placeholder="Enter group name">
+            <input type="hidden" id="groupColor" />
+            <div id="colors">
+                <div class="color" id="color1" style="background-color: gray;" data-color="gray"></div>
+                <div class="color" id="color2" style="background-color: blue;" data-color="blue"></div>
+                <div class="color" id="color3" style="background-color: red;" data-color="red"></div>
+                <div class="color" id="color4" style="background-color: yellow;" data-color="yellow"></div>
+                <div class="color" id="color5" style="background-color: green" data-color="green"></div>
+                <div class="color" id="color6" style="background-color: pink" data-color="pink"></div>
+                <div class="color" id="color7" style="background-color: purple" data-color="purple"></div>
+                <div class="color" id="color8" style="background-color: cyan" data-color="cyan"></div>
+                <div class="color" id="color9" style="background-color: orange" data-color="orange"></div>
+            </div>
+            <menu>
+                <button id="deleteGroup" value="delete">Delete</button>
+                <button id="saveGroup">Update</button>
+                <button id="cancelGroup" type="reset" formmethod="dialog" value="cancel">Cancel</button>
+            </menu>
+        </form>
+    </dialog>
+    <script src="side_panel.js" type="module" defer></script>
+</body>
+</html>

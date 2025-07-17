@@ -1,0 +1,263 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: transparent;
+    padding: 0;
+    height: 100vh;
+    margin: 0;
+}
+
+.groups {
+    user-select: none;
+    flex: 1 1 0;
+    overflow: auto;
+}
+
+.tabs {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.group.hidden {
+    display: none;
+}
+
+.pinned-tabs {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 0 4px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(127,127,127,0.3);
+    margin-bottom: 4px;
+    flex: 0 0 auto;
+}
+
+.tab {
+    border-radius: 5px;
+    padding: 5px;
+    margin: 2px;
+    border: 1px rgba(127,127,127,0.3) solid;
+    background-color: rgba(127,127,127, 0.1);
+    color: #000;
+    display: flex;
+    flex-direction: row;
+    transition: all .3s ease;
+}
+.tab:hover {
+    background-color: rgba(127,127,127, 0.2);
+    transition: all .3s ease;
+}
+
+.tab-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}
+
+.tab-title {
+    flex: 1 1 0;
+    word-break: break-word;
+}
+
+.tab.active {
+    background-color: rgba(127,127,127, 0.5);
+    transition: all .3s ease;
+}
+
+.tab.loading {
+    position: relative;
+}
+
+.tab.loading::after {
+    content: "";
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: block;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    background-color: rgba(255,255,255,0.8);
+    animation: fadeInOut 1s infinite linear;
+}
+
+.pinned-tabs .tab.pinned .tab-title {
+    display: none
+}
+
+.tab-url {
+    display: none;
+}
+
+.group-icons {
+    flex: 0 0 auto;
+    margin-top: 4px;
+    border-top: 1px solid rgba(127,127,127,0.3);
+    padding-top: 4px;
+    text-align: center;
+}
+
+.group-icon {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    margin: 0 4px;
+    cursor: pointer;
+    display: inline-block;
+    border-radius: 50%;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.group-icon.active {
+    box-shadow: 0 0 3px rgba(127,127,127,1);
+    border: 1px solid #000;
+}
+
+.group-icon div {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background-color: rgba(127,127,127, 1);
+    display: block;
+    position: absolute;
+    text-align: center;
+    line-height: 14px;
+    font-size: 12px;
+    color: #000;
+    text-shadow: 0 0 1px 1px rgba(255,255,255,0.3);
+    font-weight: bold;
+    z-index: 1;
+}
+
+.group-icon:hover {
+    box-shadow: 0 0 5px rgba(127,127,127,0.8);
+    transition: all .3s ease;
+}
+
+.group-icon::after{
+    content: "";
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: block;
+    position: absolute;
+}
+
+.drag-drop-placeholder {
+    height: 0;
+    border-top: 1px solid rgba(192,32,0,0.9);
+    margin-top: -1px;
+    margin-bottom: -1px;
+}
+
+.group-icons .drag-drop-placeholder {
+    width: 0;
+    border-left: 1px solid rgba(192,32,0,0.9);
+    border-top: 0 none transparent;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: -1px;
+    margin-right: -1px;
+    display: inline-block;
+}
+
+#colors {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.color {
+    border: 1px solid rgba(127,127,127,0.3);
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    position: relative;
+}
+
+.color.selected::after {
+    box-sizing: border-box;
+    position: relative;
+    left: 15%;
+    top: 15%;
+    content: "";
+    width: 70%;
+    height: 70%;
+    border: 2px solid #000;
+    border-radius: 50%;
+    display: block;
+}
+
+dialog {
+    background-color: rgba(127,127,127,0.4);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(127,127,127,0.6);
+    border-radius: 5px;
+    color: rgba(0,0,0,0.7);
+}
+
+dialog button,
+dialog input[type=text]{
+    background-color: rgba(64,64,64,0.4);
+    border: 1px solid rgba(64,64,64,0.6);
+    backdrop-filter: blur(2px);
+    color: rgba(0,0,0,0.7);
+}
+
+dialog label,
+dialog input {
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #222;
+    }
+
+    .tab {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        transition: all .3s ease;
+    }
+
+    .tab:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        transition: all .3s ease;
+    }
+
+    .tab.active {
+        background-color: rgba(255, 255, 255, 0.5);
+        transition: all .3s ease;
+    }
+
+    .group-icons {
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .group-icon:hover {
+        box-shadow: 0 0 5px rgba(255,255,255,0.8);
+        transition: all .3s ease;
+    }
+
+    dialog {
+        color: rgba(255,255,255,0.7);
+    }
+
+    dialog button,
+    dialog input[type=text]{
+        color: rgba(255,255,255,0.7);
+    }
+
+    .group-icon.active {
+        box-shadow: 0 0 3px rgba(255,255,255,1);
+        border: 1px solid #fff;
+    }
+}
