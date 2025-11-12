@@ -1,4 +1,4 @@
-import { fromTemplate } from "./templates.js";
+import { fromTemplate } from "./src/js/templates.js";
 import { 
     beginUpdate, 
     endUpdate, 
