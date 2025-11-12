@@ -1,10 +1,9 @@
 import TabManager from "./tab-manager.js";
-import TabRenderer from "./tab-renderer.js";
+import { renderTabs, updateTab } from "./tab-renderer.js";
 
 export default class SideTabs {
     constructor() {
         this.TabManager = new TabManager(this.onTabUpdated.bind(this));
-        this.TabRenderer = new TabRenderer(this.TabManager);
         document.querySelector('#new-tab').onclick = this.onNewTab.bind(this);
         this.refreshTabs();
     }
@@ -12,15 +11,15 @@ export default class SideTabs {
     async refreshTabs() {
         await this.TabManager.queryTabs();
         this.TabManager.setCurrentGroupId(this.TabManager.activeTabGroupId());
-        await this.TabRenderer.render();
+        await renderTabs(this.TabManager);
     }
 
     async onTabUpdated(tabId, changeInfo, tab) {
         if (tabId) {
-            this.TabRenderer.updateTab(tabId, changeInfo, tab);
+            updateTab(tabId, changeInfo, tab);
             return;
         }
-        await this.TabRenderer.render();
+        await renderTabs(this.TabManager);
     }
 
     async onNewTab() {

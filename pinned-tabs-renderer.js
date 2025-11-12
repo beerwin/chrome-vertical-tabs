@@ -1,20 +1,16 @@
-export default class PinnedTabsRenderer {
-    constructor(TabManager, tabBuilder) {
-        this.tabManager = TabManager;
-        this.pinnedTabsContainer = document.querySelector('.pinned-tabs');
-        this.tabBuilder = tabBuilder;
-    }
+import { buildTab } from "./tab-builder.js";
 
-    clearContainer() {
-        this.pinnedTabsContainer.innerHTML = '';
-    }
+const pinnedTabsContainer = () => document.querySelector('.pinned-tabs');
 
-    render() {
-        this.clearContainer();
-        for (let x in this.tabManager.pinnedTabs) {
-            const tab = this.tabManager.pinnedTabs[x];
-            const tabElement = this.tabBuilder.build(tab, 'pinned');
-            this.pinnedTabsContainer.appendChild(tabElement);
-        }
+const clearContainer = () => {
+    pinnedTabsContainer().innerHTML = '';
+}
+
+export const renderPinnedTabs = (tabManager) => {
+    clearContainer();
+    for (let x in tabManager.pinnedTabs) {
+        const tab = tabManager.pinnedTabs[x];
+        const tabElement = buildTab(tab, 'pinned', tabManager);
+        pinnedTabsContainer().appendChild(tabElement);
     }
 }

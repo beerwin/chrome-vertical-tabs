@@ -1,86 +1,60 @@
-export default class TabBuilder {
-    constructor(TabManager) {
-        this.tabManager = TabManager;
-    }
+import { fromTemplate } from "./templates.js";
 
-    build(tab, className) {
-        const tabElement = this.createRootElement(tab, className);
-        tabElement.appendChild(this.createIconElement(tab));
-        tabElement.appendChild(this.createTitleElement(tab));
-        tabElement.appendChild(this.createCloseElement(tab));
+const tabTemplate = `
+<div class="tab" title="{url}" data-tab-id="{id}" data-tab-index="{index}" data-group-id="{groupId}">
+    <img class="tab-icon" src="{favIconUrl}" title="{url}" />
+    <div class="tab-title">{title}</div>
+    <span class="tab-close" title="Close Tab">&times;</span>
+</div>
+`
 
-        this.addInteractions(tabElement, tab);
-        return tabElement;
-    }
+const addInteractions = (tabElement, tab, tabManager) => {
+    tabElement.onclick = async function(e) {
+        console.log(e);
+        tabManager.beginUpdate()
+        await tabManager.setActiveTab(tab.id);
+        tabManager.endUpdate();
+    };
 
-    createRootElement(tab, className) {
-        const tabElement = document.createElement('div');
-        tabElement.classList.add('tab');
-        if (tab.active) {
-            tabElement.classList.add('active');
+    tabElement.ondblclick = async function() {
+        if (tabElement.classList.contains('pinned')) {
+            await tabManager.unpinTab(tab.id);
         }
-        if (tab.status === 'loading') {
-            tabElement.classList.add('loading');
+        else {
+            await tabManager.pinTab(tab.id);
         }
-        tabElement.setAttribute('title', tab.url);
-        tabElement.setAttribute('data-tab-id', tab.id);
-        tabElement.setAttribute('data-tab-index', tab.index);
-        tabElement.setAttribute('data-group-id', tab.groupId);
+    }
+}
 
-        if (className) {
-            tabElement.classList.add(className);
-        }
-
-        return tabElement;
+export const buildTab = (tab, className, tabManager) => {
+    const tabElement = fromTemplate(tabTemplate, {
+        url: tab.url,
+        id: tab.id,
+        index: tab.index,
+        groupId: tab.groupId,
+        favIconUrl: tab.favIconUrl || '',
+        title: tab.title.replace(/</gi, '&lt;').replace(/>/gi, '&gt;')
+    });
+    
+    if (className) {
+        tabElement.classList.add(className);
+    }
+    if (tab.active) {
+        tabElement.classList.add('active');
+    }
+    if (tab.status === 'loading') {
+        tabElement.classList.add('loading');
     }
 
-    createTitleElement(tab) {
-        const tabTitleElement = document.createElement('div');
-        tabTitleElement.classList.add('tab-title');
-        tabTitleElement.innerHTML = tab.title.replace(/</gi, '&lt;').replace(/>/gi, '&gt;');
+    const closeElement = tabElement.querySelector('.tab-close');
 
-        return tabTitleElement;
+    closeElement.onclick = async function(e) {
+        e.stopPropagation();
+        tabManager.beginUpdate();
+        await tabManager.removeTab(tab.id);
+        tabManager.endUpdate();
     }
 
-    createIconElement(tab) {
-        const tabIconElement = document.createElement('img');
-        tabIconElement.classList.add('tab-icon');
-        if (tab.favIconUrl) {
-            tabIconElement.src = tab.favIconUrl;
-        }
-        tabIconElement.setAttribute('title', tab.url);
-
-        return tabIconElement;
-    }
-
-    createCloseElement(tab) {
-        const tabCloseElement = document.createElement('span');
-        tabCloseElement.classList.add('tab-close');
-        tabCloseElement.innerHTML = '&times;';
-        tabCloseElement.setAttribute('title', 'Close Tab');
-        tabCloseElement.onclick = async function() {
-            this.tabManager.beginUpdate();
-            await this.tabManager.removeTab(tab.id);
-            this.tabManager.endUpdate();
-        }.bind(this);
-
-        return tabCloseElement;
-    }
-
-    addInteractions(tabElement, tab) {
-        tabElement.onclick = async function(e) {
-            console.log(e);
-            this.tabManager.beginUpdate()
-            await this.tabManager.setActiveTab(tab.id);
-            this.tabManager.endUpdate();
-        }.bind(this);
-        tabElement.ondblclick = async function() {
-            if (tabElement.classList.contains('pinned')) {
-                await this.tabManager.unpinTab(tab.id);
-            }
-            else {
-                await this.tabManager.pinTab(tab.id);
-            }
-        }.bind(this);
-    }
+    addInteractions(tabElement, tab, tabManager);
+    return tabElement;
 }
