@@ -1,4 +1,12 @@
 import { fromTemplate } from "./templates.js";
+import { 
+    beginUpdate, 
+    endUpdate, 
+    setActiveTab, 
+    pinTab, 
+    unpinTab,
+    removeTab,
+} from "./tab-manager.js";
 
 const tabTemplate = `
 <div class="tab" title="{url}" data-tab-id="{id}" data-tab-index="{index}" data-group-id="{groupId}">
@@ -8,24 +16,24 @@ const tabTemplate = `
 </div>
 `
 
-const addInteractions = (tabElement, tab, tabManager) => {
+const addInteractions = (tabElement, tab) => {
     tabElement.onclick = async function(e) {
-        tabManager.beginUpdate()
-        await tabManager.setActiveTab(tab.id);
-        tabManager.endUpdate();
+        beginUpdate()
+        await setActiveTab(tab.id);
+        endUpdate();
     };
 
     tabElement.ondblclick = async function() {
         if (tabElement.classList.contains('pinned')) {
-            await tabManager.unpinTab(tab.id);
+            await unpinTab(tab.id);
         }
         else {
-            await tabManager.pinTab(tab.id);
+            await pinTab(tab.id);
         }
     }
 }
 
-export const buildTab = (tab, className, tabManager) => {
+export const buildTab = (tab, className) => {
     const tabElement = fromTemplate(tabTemplate, {
         url: tab.url,
         id: tab.id,
@@ -49,11 +57,11 @@ export const buildTab = (tab, className, tabManager) => {
 
     closeElement.onclick = async function(e) {
         e.stopPropagation();
-        tabManager.beginUpdate();
-        await tabManager.removeTab(tab.id);
-        tabManager.endUpdate();
+        beginUpdate();
+        await removeTab(tab.id);
+        endUpdate();
     }
 
-    addInteractions(tabElement, tab, tabManager);
+    addInteractions(tabElement, tab);
     return tabElement;
 }

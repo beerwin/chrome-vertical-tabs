@@ -2,7 +2,18 @@ import { addDraggable, addDropTarget } from "./drag-drop.js";
 import { renderTabGroupIcons } from "./tab-group-icon-renderer.js";
 import { buildTab } from "./tab-builder.js";
 import { renderPinnedTabs } from "./pinned-tabs-renderer.js";
-import {mapColor} from "./tab-group-color-map.js";
+import { mapColor } from "./tab-group-color-map.js";
+import { 
+    getTabsByGroupId,
+    getCurrentGroupId,
+    tabGroupById,
+    moveTab,
+    moveTabToGroup,
+    createGroup,
+    beginUpdate,
+    endUpdate,
+    setCurrentGroupId,
+} from "./tab-manager.js";
 import TabStatusMapper from "./tab-status-mapper.js";
 
 let groupsContainerElement = null;
@@ -29,26 +40,26 @@ const revealActiveTab = () => {
     }
 }
 
-export const renderTabs = async (tabManager) => {
+export const renderTabs = async () => {
     clearGroupsContainer();
-    renderPinnedTabs(tabManager);
-    const currentTabs = tabManager.getTabsByGroupId();
-    if (tabManager.getCurrentGroupId() === -1) {
+    renderPinnedTabs();
+    const currentTabs = getTabsByGroupId();
+    if (getCurrentGroupId() === -1) {
         groupsContainer().style.backgroundColor = 'transparent';
     } else {
         groupsContainer().style.backgroundColor = mapColor(
-            tabManager.tabGroupById(tabManager.getCurrentGroupId()).color,
+            tabGroupById(getCurrentGroupId()).color,
             '22'
         );
     }
     for (let x in currentTabs) {
         const tab = currentTabs[x];
-        groupsContainer().appendChild(buildTab(tab, null, tabManager));
+        groupsContainer().appendChild(buildTab(tab, null));
     }
 
-    renderTabGroupIcons(tabManager);
+    renderTabGroupIcons();
 
-    addInteractions(tabManager);
+    addInteractions();
 
     revealActiveTab();
 }
@@ -80,22 +91,22 @@ export const updateTab = (tabId, changeInfo) => {
     }
 }
 
-const addInteractions = (tabManager) => {
+const addInteractions = () => {
     addDraggable('.groups .tab');
     addDropTarget('.groups .tab', async (target, data) => {
         const targetData = target.dataset;
-        await tabManager.moveTab(parseInt(data.tabId), parseInt(targetData.tabIndex));
+        await moveTab(parseInt(data.tabId), parseInt(targetData.tabIndex));
     });
 
     addDropTarget('.group-icons .group-icon:not(.add-group)', async (target, data) => {
         const targetData = target.dataset;
-        await tabManager.moveTabToGroup(parseInt(data.tabId), parseInt(targetData.groupId));
+        await moveTabToGroup(parseInt(data.tabId), parseInt(targetData.groupId));
     });
 
     addDropTarget('.group-icons .add-group', async (target, data) => {
-        tabManager.beginUpdate();
-        const newGroup = await tabManager.createGroup("", [parseInt(data.tabId)]);
-        await tabManager.setCurrentGroupId(newGroup);
-        tabManager.endUpdate();
+        beginUpdate();
+        const newGroup = await createGroup("", [parseInt(data.tabId)]);
+        setCurrentGroupId(newGroup);
+        endUpdate();
     });
 }

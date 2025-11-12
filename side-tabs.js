@@ -1,28 +1,38 @@
-import TabManager from "./tab-manager.js";
+import {
+    createTabManager, 
+    queryTabs, 
+    activeTabGroupId, 
+    getCurrentGroupId,
+    setCurrentGroupId,
+    beginUpdate, 
+    endUpdate,
+    createTab,
+    moveTabToGroup,
+} from "./tab-manager.js";
 import { renderTabs, updateTab } from "./tab-renderer.js";
 
-const refreshTabs = async (tabManager) => {
-    await tabManager.queryTabs();
-    tabManager.setCurrentGroupId(tabManager.activeTabGroupId());
-    await renderTabs(tabManager);
+const refreshTabs = async () => {
+    await queryTabs();
+    setCurrentGroupId(activeTabGroupId());
+    await renderTabs();
 }
 
 export const sideTabs = () => {
-    const tabManager = new TabManager(async (tabId, changeInfo, tab) => {
+    createTabManager(async (tabId, changeInfo, tab) => {
         if (tabId) {
             updateTab(tabId, changeInfo, tab);
             return;
         }
-        await renderTabs(tabManager);
+        await renderTabs();
     });
     
     document.querySelector('#new-tab').onclick = async () => {
-        const currentGroupId = tabManager.getCurrentGroupId();
-        tabManager.beginUpdate();
-        const tab = await tabManager.createTab();
-        await tabManager.moveTabToGroup(tab.id, currentGroupId);
-        tabManager.endUpdate();
+        const currentGroupId = getCurrentGroupId();
+        beginUpdate();
+        const tab = await createTab();
+        await moveTabToGroup(tab.id, currentGroupId);
+        endUpdate();
     }
 
-    refreshTabs(tabManager)
+    refreshTabs()
 }

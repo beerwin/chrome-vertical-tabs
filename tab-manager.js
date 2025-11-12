@@ -1,195 +1,211 @@
-export default class TabManager {
-    constructor(updateEvent) {
-        this.tabs = [];
-        this.pinnedTabs = [];
-        this.nonPinnedTabs = [];
-        this.tabGroups = [];
-        chrome.tabs.onUpdated.addListener(this.onTabUpdated.bind(this));
-        chrome.tabs.onRemoved.addListener(this.onTabRemoved.bind(this));
-        chrome.tabs.onCreated.addListener(this.onTabCreated.bind(this));
-        chrome.tabs.onActivated.addListener(this.onTabActivated.bind(this));
-        chrome.tabs.onMoved.addListener(this.onTabUpdated.bind(this));
-        this.updateEvent = updateEvent;
-        this.currentGroupId = -1;
+let tabs = [];
+export let pinnedTabs = [];
+export let nonPinnedTabs = [];
+export let tabGroups = [];
+let updateEvent;
+let currentGroupId = -1;
+let isUpdating = false;
+
+export const createTabManager = async (aUpdateEvent) => {
+    chrome.tabs.onUpdated.addListener(onTabUpdated);
+    chrome.tabs.onRemoved.addListener(onTabRemoved);
+    chrome.tabs.onCreated.addListener(onTabCreated);
+    chrome.tabs.onActivated.addListener(onTabActivated);
+    chrome.tabs.onMoved.addListener(onTabUpdated);
+    updateEvent = aUpdateEvent;    
+    await queryTabs();
+}
+
+
+
+
+export const queryTabs = async () => {
+    tabs = await chrome.tabs.query({currentWindow: true});
+    nonPinnedTabs = tabs.filter(tab => !tab.pinned);
+    pinnedTabs = tabs.filter(tab => tab.pinned);
+    tabGroups = await chrome.tabGroups.query({windowId: tabs[0].windowId});
+    const [activeTab] = await chrome.tabs.query({active: true, currentWindow: true});
+    if (activeTab) {
+        currentGroupId = activeTab.groupId;
+    }
+    if (!tabGroups.find(g => g.id === -1)) {
+        tabGroups.unshift({
+            id: -1,
+            title: 'Ungrouped',
+            color: 'gray',
+            active: currentGroupId === -1,
+        })
+    }
+}
+
+export const getCurrentGroupId = () => {
+    return currentGroupId;
+}
+
+export const setCurrentGroupId = (groupId) => {
+    const group = tabGroups.find(group => group.id === groupId);
+    if (groupId !== -1 && group) {
+        currentGroupId = groupId;
+    } else {
+        currentGroupId = -1;
+    }
+    if (updateEvent) {
+        updateEvent();
+    }
+}
+
+export const activeTabGroupId = () => {
+    const [tab] = tabs.filter(tab => tab.active);
+    if (tab) {
+        return tab.groupId;
+    }
+    return -1;
+}
+
+export const updateActiveGroupId = () => {
+    if (currentGroupId === activeTabGroupId()) {
+        return;
+    }
+    setCurrentGroupId(activeTabGroupId());
+}
+
+export const getTabsByGroupId = () => {
+    return tabs.filter(tab => tab.groupId === currentGroupId && !tab.pinned);
+}
+
+export const setActiveTab = async (tabId) => {
+    await chrome.tabs.update(tabId, {active: true});
+}
+
+export const beginUpdate = () => {
+    isUpdating = true;
+}
+
+export const endUpdate = () => {
+    isUpdating = false;
+    doUpdate();
+}
+
+export const doUpdateTab = (tabId, changeInfo, tab) => {
+    if (isUpdating) {
+        return;
+    }
+    if (updateEvent) {
+        updateEvent(tabId, changeInfo, tab);
+    }
+}
+
+export const doUpdate = () => {
+    if (isUpdating) {
+        return;
     }
 
-    async queryTabs() {
-        this.tabs = await chrome.tabs.query({currentWindow: true});
-        this.nonPinnedTabs = this.tabs.filter(tab => !tab.pinned);
-        this.pinnedTabs = this.tabs.filter(tab => tab.pinned);
-        this.tabGroups = await chrome.tabGroups.query({windowId: this.tabs[0].windowId});
-        const [activeTab] = await chrome.tabs.query({active: true, currentWindow: true});
-        if (activeTab) {
-            this.currentGroupId = activeTab.groupId;
-        }
-        if (!this.tabGroups.find(g => g.id === -1)) {
-            this.tabGroups.unshift({
-                id: -1,
-                title: 'Ungrouped',
-                color: 'gray',
-                active: this.currentGroupId === -1,
-            })
-        }
+    if (updateEvent) {
+        updateEvent();
     }
+}
 
-    getCurrentGroupId() {
-        return this.currentGroupId;
-    }
+export const createTab = async (url) => {
+    const tab = await chrome.tabs.create({url: url});
+    await queryTabs();
+    doUpdate();
+    return tab;
+}
 
-    setCurrentGroupId(groupId) {
-        const group = this.tabGroups.find(group => group.id === groupId);
-        if (groupId !== -1 && group) {
-            this.currentGroupId = groupId;
-        } else {
-            this.currentGroupId = -1;
-        }
-        if (this.updateEvent) {
-            this.updateEvent();
-        }
-    }
+export const removeTab = async (tabId) => {
+    await chrome.tabs.remove(tabId);
+    await queryTabs();
+    doUpdate();
+}
 
-    activeTabGroupId() {
-        const [tab] = this.tabs.filter(tab => tab.active);
-        if (tab) {
-            return tab.groupId;
-        }
-        return -1;
-    }
+export const pinTab = async (tabId) => {
+    await chrome.tabs.update(tabId, {pinned: true});
+    await queryTabs();
+    doUpdate();
+}
 
-    updateActiveGroupId() {
-        if (this.currentGroupId === this.activeTabGroupId()) {
-            return;
-        }
-        this.setCurrentGroupId(this.activeTabGroupId);
-    }
+export const unpinTab = async (tabId) => {
+    await chrome.tabs.update(tabId, {pinned: false});
+    await queryTabs();
+    doUpdate();
+}
 
-    getTabsByGroupId() {
-        return this.tabs.filter(tab => tab.groupId === this.currentGroupId && !tab.pinned);
-    }
+export const moveTab = async (tabId, newIndex) => {
+    await chrome.tabs.move(tabId, {index: newIndex});
+    await queryTabs();
+    doUpdate();
+}
 
-    async setActiveTab(tabId) {
-        await chrome.tabs.update(tabId, {active: true});
+export const moveTabToGroup = async (tabId, groupId) => {
+    if (groupId === -1) {
+        await removeTabFromGroup(tabId);
+        return;
     }
+    await chrome.tabs.group({tabIds: [tabId], groupId: groupId});
+    await queryTabs();
+    doUpdate();
+}
 
-    beginUpdate() {
-        this.isUpdating = true;
-    }
+export const removeGroup = async (groupId) => {
+    const groupIdTabs = tabs.filter(tab => tab.groupId === groupId).map(t => t.id);
+    chrome.tabs.remove(groupIdTabs);
+    await queryTabs();
+    doUpdate();
+}
 
-    endUpdate() {
-        this.isUpdating = false;
-        this.doUpdate();
-    }
+export const createGroup = async (groupName, tabIds) => {
+    const groupId = await chrome.tabs.group({tabIds: tabIds});
+    await chrome.tabGroups.update(groupId, {title: groupName});
+    await queryTabs();
+    doUpdate();
+    return groupId;
+}
 
-    doUpdateTab(tabId, changeInfo, tab) {
-        if (this.isUpdating) {
-            return;
-        }
-        if (this.updateEvent) {
-            this.updateEvent(tabId, changeInfo, tab);
-        }
-    }
+export const removeTabFromGroup = async (tabId) => {
+    await chrome.tabs.ungroup(tabId);
+    await queryTabs();
+    doUpdate();
+}
 
-    doUpdate() {
-        if (this.isUpdating) {
-            return;
-        }
+export const onTabActivated = async (x, y) => {
+    await queryTabs();
+    currentGroupId = activeTabGroupId();
+    doUpdate();
+}
 
-        if (this.updateEvent) {
-            this.updateEvent();
-        }
+export const onTabUpdated = async (tabId, changeInfo, tab) => {
+    if (tabId) {
+        doUpdateTab(tabId, changeInfo, tab);
+        return;
     }
+    await queryTabs();
+    doUpdate();
+}
 
-    async createTab(url) {
-        const tab = await chrome.tabs.create({url: url});
-        await this.queryTabs();
-        this.doUpdate();
-        return tab;
-    }
+export const onTabRemoved = async () => {
+    await queryTabs();
+    currentGroupId = activeTabGroupId();
+    doUpdate();
+}
 
-    async removeTab(tabId) {
-        await chrome.tabs.remove(tabId);
-        await this.queryTabs();
-        this.doUpdate();
-    }
-    async pinTab(tabId) {
-        await chrome.tabs.update(tabId, {pinned: true});
-        await this.queryTabs();
-        this.doUpdate();
-    }
-    async unpinTab(tabId) {
-        await chrome.tabs.update(tabId, {pinned: false});
-        await this.queryTabs();
-        this.doUpdate();
-    }
-    async moveTab(tabId, newIndex) {
-        await chrome.tabs.move(tabId, {index: newIndex});
-        await this.queryTabs();
-        this.doUpdate();
-    }
-    async moveTabToGroup(tabId, groupId) {
-        if (groupId === -1) {
-            await this.removeTabFromGroup(tabId);
-            return;
-        }
-        await chrome.tabs.group({tabIds: [tabId], groupId: groupId});
-        await this.queryTabs();
-        this.doUpdate();
-    }
-    async removeGroup(groupId) {
-        const groupIdTabs = this.tabs.filter(tab => tab.groupId === groupId).map(t => t.id);
-        chrome.tabs.remove(groupIdTabs);
-        await this.queryTabs();
-        this.doUpdate();
-    }
-    async createGroup(groupName, tabIds) {
-        const groupId = await chrome.tabs.group({tabIds: tabIds});
-        await chrome.tabGroups.update(groupId, {title: groupName});
-        await this.queryTabs();
-        this.doUpdate();
-        return groupId;
-    }
-    async removeTabFromGroup(tabId) {
-        await chrome.tabs.ungroup(tabId);
-        await this.queryTabs();
-        this.doUpdate();
-    }
+export const onTabCreated = async () => {
+    await queryTabs();
+    currentGroupId = activeTabGroupId();
+    doUpdate();
+}   
 
-    async onTabActivated(x, y) {
-        await this.queryTabs();
-        this.currentGroupId = this.activeTabGroupId();
-        this.doUpdate();
-    }
-    async onTabUpdated(tabId, changeInfo, tab) {
-        if (tabId) {
-            this.doUpdateTab(tabId, changeInfo, tab);
-            return;
-        }
-        await this.queryTabs();
-        this.doUpdate();
-    }
-    async onTabRemoved() {
-        await this.queryTabs();
-        this.currentGroupId = this.activeTabGroupId();
-        this.doUpdate();
-    }
-    async onTabCreated() {
-        await this.queryTabs();
-        this.currentGroupId = this.activeTabGroupId();
-        this.doUpdate();
-    }   
-    async renameGroup(groupId, newName) {
-        await chrome.tabGroups.update(groupId, {title: newName});
-        await this.queryTabs();
-        this.doUpdate();
-    }
+export const renameGroup = async (groupId, newName) => {
+    await chrome.tabGroups.update(groupId, {title: newName});
+    await queryTabs();
+    doUpdate();
+}
 
-    async setGroupColor(groupId, color) {
-        await chrome.tabGroups.update(groupId, {color: color});
-        await this.queryTabs();
-        this.doUpdate();
-    }
+export const setGroupColor = async (groupId, color) => {
+    await chrome.tabGroups.update(groupId, {color: color});
+    await queryTabs();
+    doUpdate();
+}
 
-    tabGroupById(id) {
-        return this.tabGroups.find(group => group.id === id);
-    }
+export const tabGroupById = (id) => {
+    return tabGroups.find(group => group.id === id);
 }

@@ -1,4 +1,5 @@
 import { buildTab } from "./tab-builder.js";
+import { pinnedTabs } from "./tab-manager.js";
 
 const pinnedTabsContainer = () => document.querySelector('.pinned-tabs');
 
@@ -6,11 +7,11 @@ const clearContainer = () => {
     pinnedTabsContainer().innerHTML = '';
 }
 
-export const renderPinnedTabs = (tabManager) => {
+export const renderPinnedTabs = () => {
     clearContainer();
-    for (let x in tabManager.pinnedTabs) {
-        const tab = tabManager.pinnedTabs[x];
-        const tabElement = buildTab(tab, 'pinned', tabManager);
+    for (let x in pinnedTabs) {
+        const tab = pinnedTabs[x];
+        const tabElement = buildTab(tab, 'pinned');
         pinnedTabsContainer().appendChild(tabElement);
     }
 }

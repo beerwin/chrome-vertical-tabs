@@ -1,4 +1,5 @@
 import { mapColor } from "./tab-group-color-map.js";
+import { beginUpdate, endUpdate, removeGroup, renameGroup, setGroupColor } from "./tab-manager.js";
 let dialogElement = null;
 
 const groupContextDialog = () => {
@@ -9,11 +10,11 @@ const groupContextDialog = () => {
     return dialogElement;
 }
 
-export const tabGroupEditor = (tabManager, tabGroup) => {
+export const tabGroupEditor = (tabGroup) => {
     showModal(tabGroup);
     setTitle(tabGroup);
-    initUpdateAction(tabManager, tabGroup);
-    initDeleteAction(tabManager, tabGroup);
+    initUpdateAction(tabGroup);
+    initDeleteAction(tabGroup);
     initCancelAction();
 }
 
@@ -51,25 +52,25 @@ const setTitle = (tabGroup) => {
     document.querySelector("#groupName").value = tabGroup.title;
 }
 
-const initDeleteAction = (tabManager, tabGroup) => {
+const initDeleteAction = (tabGroup) => {
     const deleteButton = document.querySelector('#deleteGroup');
     deleteButton.onclick = async function () {
-        await tabManager.removeGroup(tabGroup.id);
+        await removeGroup(tabGroup.id);
         closeDialog();
     }
 }
 
-const initUpdateAction = (tabManager, tabGroup) => {
+const initUpdateAction = (tabGroup) => {
     const updateButton = document.querySelector('#saveGroup');
     updateButton.onclick = async function () {
         const newTitle = document.querySelector('#groupName').value;
         const newColor = document.querySelector('#groupColor').value;
-        tabManager.beginUpdate();
+        beginUpdate();
         if (newTitle) {
-            await tabManager.renameGroup(tabGroup.id, newTitle);
+            await renameGroup(tabGroup.id, newTitle);
         }
-        await tabManager.setGroupColor(tabGroup.id, newColor);
-        tabManager.endUpdate();
+        await setGroupColor(tabGroup.id, newColor);
+        endUpdate();
         closeDialog();
     }
 }
