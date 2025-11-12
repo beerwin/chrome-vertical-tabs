@@ -1,10 +1,9 @@
-import TabGroupColorMapper from "./tab-group-color-map.js";
+import { mapColor } from "./tab-group-color-map.js";
 
 export default class TabGroupEditor {
     constructor(TabManager, tabGroup) {
         this.tabManager = TabManager;
         this.tabGroup = tabGroup;
-        this.colorMapper = new TabGroupColorMapper();
         this.showModal();
         this.setTitle();
         this.initUpdateAction();
@@ -15,7 +14,7 @@ export default class TabGroupEditor {
     buildColors() {
         document.querySelectorAll('.color').forEach(e => {
             e.classList.remove('selected');
-            e.style.backgroundColor = this.colorMapper.map(e.dataset.color);
+            e.style.backgroundColor = mapColor(e.dataset.color);
             if (e.dataset.color === this.tabGroup.color) {
                 e.classList.add('selected');
             }

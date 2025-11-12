@@ -2,7 +2,7 @@ import { addDraggable, addDropTarget } from "./drag-drop.js";
 import { renderTabGroupIcons } from "./tab-group-icon-renderer.js";
 import { buildTab } from "./tab-builder.js";
 import { renderPinnedTabs } from "./pinned-tabs-renderer.js";
-import TabGroupColorMapper from "./tab-group-color-map.js";
+import {mapColor} from "./tab-group-color-map.js";
 import TabStatusMapper from "./tab-status-mapper.js";
 
 let groupsContainerElement = null;
@@ -38,7 +38,7 @@ export const renderTabs = async (tabManager) => {
     if (tabManager.getCurrentGroupId() === -1) {
         groupsContainer().style.backgroundColor = 'transparent';
     } else {
-        groupsContainer().style.backgroundColor = (new TabGroupColorMapper).map(
+        groupsContainer().style.backgroundColor = mapColor(
             tabManager.tabGroupById(tabManager.getCurrentGroupId()).color,
             '22'
         );

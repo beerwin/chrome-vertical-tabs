@@ -1,4 +1,4 @@
-import TabGroupColorMapper from "./tab-group-color-map.js";
+import { mapColor } from "./tab-group-color-map.js";
 import TabGroupEditor from "./tab-group-editor.js";
 import { fromTemplate } from "./templates.js";
 
@@ -36,7 +36,7 @@ export const renderTabGroupIcons = (tabManager) => {
             title: tabGroup.title,
             id: tabGroup.id
         });
-        groupElement.style.backgroundColor = (new TabGroupColorMapper).map(tabGroup.color);
+        groupElement.style.backgroundColor = mapColor(tabGroup.color);
         if (tabManager.activeTabGroupId() === tabGroup.id) {
             groupElement.classList.add('active');
         }
