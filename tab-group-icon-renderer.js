@@ -1,6 +1,6 @@
-import { mapColor } from "./src/js/tab-group-color-map.js";
+import { mapColor } from "./tab-group-color-map.js";
 import { tabGroupEditor } from "./tab-group-editor.js";
-import { fromTemplate } from "./src/js/templates.js";
+import { fromTemplate } from "./templates.js";
 import {
     tabGroups,
     activeTabGroupId,

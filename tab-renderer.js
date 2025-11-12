@@ -2,7 +2,7 @@ import { addDraggable, addDropTarget } from "./drag-drop.js";
 import { renderTabGroupIcons } from "./tab-group-icon-renderer.js";
 import { buildTab } from "./tab-builder.js";
 import { renderPinnedTabs } from "./pinned-tabs-renderer.js";
-import { mapColor } from "./src/js/tab-group-color-map.js";
+import { mapColor } from "./tab-group-color-map.js";
 import { 
     getTabsByGroupId,
     getCurrentGroupId,

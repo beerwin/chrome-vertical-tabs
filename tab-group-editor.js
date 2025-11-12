@@ -1,4 +1,4 @@
-import { mapColor } from "./src/js/tab-group-color-map.js";
+import { mapColor } from "./tab-group-color-map.js";
 import { 
     beginUpdate, 
     endUpdate, 
