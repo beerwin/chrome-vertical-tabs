@@ -8,11 +8,9 @@ import TabStatusMapper from "./tab-status-mapper.js";
 let groupsContainerElement = null;
 
 const groupsContainer = () => {
-    console.log(groupsContainerElement);
     if (!groupsContainerElement) {
         groupsContainerElement = document.querySelector('.groups');
     }
-    console.log(groupsContainerElement);
     return groupsContainerElement;
 }
 
@@ -61,10 +59,7 @@ export const updateTab = (tabId, changeInfo) => {
         return;
     }
 
-    console.log('updateTab', tabId, changeInfo);
-
     if (changeInfo.status) {
-        console.log(changeInfo.status)
         tabElement.classList.remove('loading', 'complete', 'error', 'unloaded', 'interrupted');
         const mapper = new TabStatusMapper();
         tabElement.classList.add(mapper.map(changeInfo.status));
@@ -73,7 +68,6 @@ export const updateTab = (tabId, changeInfo) => {
     if (changeInfo.favIconUrl) {
         const tabIconElement = tabElement.querySelector('.tab-icon');
         if (tabIconElement) {
-            console.log(changeInfo.favIconUrl);
             tabIconElement.src = changeInfo.favIconUrl;
         }
     }
@@ -81,7 +75,6 @@ export const updateTab = (tabId, changeInfo) => {
     if (changeInfo.title) {
         const tabTitleElement = tabElement.querySelector('.tab-title');
         if (tabTitleElement) {
-            console.log(changeInfo.title);
             tabTitleElement.innerHTML = changeInfo.title.replace(/</gi, '&lt;').replace(/>/gi, '&gt;');
         }
     }

@@ -10,7 +10,6 @@ const tabTemplate = `
 
 const addInteractions = (tabElement, tab, tabManager) => {
     tabElement.onclick = async function(e) {
-        console.log(e);
         tabManager.beginUpdate()
         await tabManager.setActiveTab(tab.id);
         tabManager.endUpdate();
