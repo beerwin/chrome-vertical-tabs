@@ -1,5 +1,11 @@
 import { mapColor } from "./tab-group-color-map.js";
-import { beginUpdate, endUpdate, removeGroup, renameGroup, setGroupColor } from "./tab-manager.js";
+import { 
+    beginUpdate, 
+    endUpdate, 
+    removeGroup, 
+    renameGroup, 
+    setGroupColor,
+} from "./tab-manager.js";
 let dialogElement = null;
 
 const groupContextDialog = () => {

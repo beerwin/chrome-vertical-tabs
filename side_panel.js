@@ -1,3 +1,3 @@
-import {sideTabs} from "./side-tabs.js";
+import { sideTabs } from "./side-tabs.js";
 
 sideTabs()
