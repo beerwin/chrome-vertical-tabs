@@ -1,5 +1,5 @@
 import { mapColor } from "./tab-group-color-map.js";
-import TabGroupEditor from "./tab-group-editor.js";
+import { tabGroupEditor } from "./tab-group-editor.js";
 import { fromTemplate } from "./templates.js";
 
 const groupTemplate = `
@@ -46,7 +46,7 @@ export const renderTabGroupIcons = (tabManager) => {
         };
         if (tabGroup.id > 0) {
             groupElement.ondblclick = async function () {
-                new TabGroupEditor(tabManager, tabGroup);
+                tabGroupEditor(tabManager, tabGroup);
             }
         }
     }
