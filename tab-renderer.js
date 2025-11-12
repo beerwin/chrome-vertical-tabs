@@ -2,7 +2,7 @@ import { addDraggable, addDropTarget } from "./drag-drop.js";
 import { renderTabGroupIcons } from "./tab-group-icon-renderer.js";
 import { buildTab } from "./tab-builder.js";
 import { renderPinnedTabs } from "./pinned-tabs-renderer.js";
-import { mapColor } from "./tab-group-color-map.js";
+import { mapColor } from "./src/js/tab-group-color-map.js";
 import { 
     getTabsByGroupId,
     getCurrentGroupId,
@@ -14,7 +14,7 @@ import {
     endUpdate,
     setCurrentGroupId,
 } from "./tab-manager.js";
-import TabStatusMapper from "./tab-status-mapper.js";
+import { mapTabStatus } from "./tab-status-mapper.js";
 
 let groupsContainerElement = null;
 
@@ -72,8 +72,7 @@ export const updateTab = (tabId, changeInfo) => {
 
     if (changeInfo.status) {
         tabElement.classList.remove('loading', 'complete', 'error', 'unloaded', 'interrupted');
-        const mapper = new TabStatusMapper();
-        tabElement.classList.add(mapper.map(changeInfo.status));
+        tabElement.classList.add(mapTabStatus(changeInfo.status));
     }
 
     if (changeInfo.favIconUrl) {
